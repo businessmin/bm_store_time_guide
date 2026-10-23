@@ -267,7 +267,7 @@ const D=()=>({
  input:["STEP 3","배달 가능한 시간을 입력해주세요","처음에는 영업시간과 같은 시간으로 입력되어 있어요."],
  typed:["STEP 3","배달 가능한 시간을 입력해주세요",`${L()} 운영시간은 영업시간 이내에서만 설정할 수 있어요.`],
  days:["STEP 4","다른 요일에도 동일하게 설정하고 싶다면, 해당 요일을 선택하고, 저장버튼을 눌러주세요.",null],
- done:["완료","배달 가능 시간 설정이 완료됐어요",null]
+ done:["완료","배달가능 운영시간 설정이 완료됐어요",null]
 });
 const nb=t=>(t||"").replace(/ (버튼을|운영시간|눌러주세요|눌러보세요|입력해주세요|클릭해주세요|선택해주세요\.|완료됐어요|있어요\.|표시돼요\.)/g," $1");
 function coach(k){const [l,t,n]=D()[k];$("cLab").textContent=l;$("cTxt").textContent=nb(t);$("cNote").hidden=!n;$("cNote").textContent=nb(n);
