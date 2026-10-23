@@ -264,9 +264,9 @@ const fresh=()=>({step:"change",on:false,typed:false,sel:new Set(),all:false,set
 const D=()=>({
  change:["STEP 1","변경 버튼을 눌러보세요",null],
  toggle:["STEP 2",`${L()} 운영시간 버튼을 활성화하세요`,`버튼을 켜면 영업시간 안에서 ${L()} 운영시간을 따로 정할 수 있어요.`],
- input:["STEP 3","배달 가능한 시간을 입력해주세요","처음에는 영업시간과 같은 시간으로 입력되어 있어요."],
- typed:["STEP 3","배달 가능한 시간을 입력해주세요",`${L()} 운영시간은 영업시간 이내에서만 설정할 수 있어요.`],
- days:["STEP 4","다른 요일에도 동일하게 설정하고 싶다면, 해당 요일을 선택하고, 저장버튼을 눌러주세요.",null],
+ input:["STEP 3","배달 가능한 시간을 입력해주세요","예시를 위해 오전 11시~오후 8시로 설정해볼게요."],
+ typed:["STEP 3","배달 가능한 시간을 입력해주세요","예시를 위해 오전 11시~오후 8시로 설정해볼게요."],
+ days:["STEP 4","다른 요일에도 동일하게 설정하고 싶다면 필요한 요일을 선택하고, 하단의 저장 버튼을 눌러주세요.",null],
  done:["완료","배달가능 운영시간 설정이 완료됐어요",null]
 });
 const nb=t=>(t||"").replace(/ (버튼을|운영시간|눌러주세요|눌러보세요|입력해주세요|클릭해주세요|선택해주세요\.|완료됐어요|있어요\.|표시돼요\.)/g," $1");
@@ -312,6 +312,7 @@ function nudge(el){nEl=el;const go=()=>{[el,ringEl,tipEl].forEach(x=>{if(!x)retu
 function inView(el,full){const [sc]=cur();const a=sc.getBoundingClientRect(),r=el.getBoundingClientRect();
   return full?(r.top>=a.top-2&&r.bottom<=a.bottom+2):(r.top<a.bottom-40*SCALE&&r.bottom>a.top);}
 function target(){
+  if(S.step==="days")return [$("chips"),"필요한 <b>요일</b>을 선택해보세요",0,2];
   if(S.step==="change")return [$("chg0"),"<b>변경</b> 버튼을 눌러보세요",1];
   if(S.step==="toggle")return [$("dlvSw"),"<b>버튼</b>을 활성화하세요",1];
   return null;
@@ -413,12 +414,8 @@ function toDays(){
   const sc=$("scEdit"),r=rel($("sameBox"),$("ctEdit"));
   sc.scrollTo({top:Math.max(0,r.y+r.h-sc.clientHeight),behavior:"smooth"});
   setTimeout(()=>{spot($("sameBox"),-4,3000);guide();},450);
-  // 화요일 → 수요일을 하나씩 누르듯 자동 선택한 뒤 저장 유도
-  clearTimeout(fT);
-  const tapChip=(i,next)=>{fT=setTimeout(()=>{if(!S||S.step!=="days")return;const c=$("chips").querySelector(`[data-c="${i}"]`);
-    c.classList.add("press");fT=setTimeout(()=>{S.sel.add(i);drawChips();const n=$("chips").querySelector(`[data-c="${i}"]`);n.classList.add("tapfx");next&&next();},180);},next===toSaveLater?900:1300);};
-  const toSaveLater=()=>{fT=setTimeout(()=>{if(S&&S.step==="days")toSave();},1000);};
-  tapChip(1,()=>tapChip(2,toSaveLater));
+  // 2초간 아무 선택이 없으면 저장 유도
+  clearTimeout(fT);fT=setTimeout(()=>{if(S&&S.step==="days")toSave();},2450);
 }
 function toSave(){clearTimeout(fT);S.step="save";clearTip();clearSpot();setHint(null);saveHl(true);}
 function saveHl(on){$("saveBtn").classList.toggle("hl",on);$("sTip").hidden=!on;}
@@ -449,8 +446,8 @@ $("rows").addEventListener("click",e=>{const b=e.target.closest(".chg");if(!b||!
 });
 $("dlvSw").onclick=()=>{if(S&&S.step==="toggle")turnOn();};
 ["dS","dE"].forEach(id=>$(id).addEventListener("click",()=>{if(S&&S.step==="input"&&!S.typed){clearTimeout(fT);typeDemo();}}));
-$("allCk").onclick=()=>{if(!S||!S.typed||S.step==="days")return;const all=S.sel.size===6;S.sel=all?new Set():new Set([1,2,3,4,5,6]);picked();};
-$("chips").addEventListener("click",e=>{const c=e.target.closest("[data-c]");if(!c||!S||!S.typed||S.step==="days")return;const i=+c.dataset.c;S.sel.has(i)?S.sel.delete(i):S.sel.add(i);picked();});
+$("allCk").onclick=()=>{if(!S||!S.typed)return;const all=S.sel.size===6;S.sel=all?new Set():new Set([1,2,3,4,5,6]);picked();};
+$("chips").addEventListener("click",e=>{const c=e.target.closest("[data-c]");if(!c||!S||!S.typed)return;const i=+c.dataset.c;S.sel.has(i)?S.sel.delete(i):S.sel.add(i);picked();});
 $("saveBtn").onclick=doSave;
 $("eX").onclick=()=>{if(!S)return;closeEdit();start(M);};
 $("doneBtn").onclick=reset;
